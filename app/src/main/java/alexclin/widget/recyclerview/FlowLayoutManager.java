@@ -120,42 +120,49 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         }else if(oldDirecrionValue!=getDirectionValue()){
             clearLayout(recycler);
         }
+        int scrollDelta = mScrollDelta-delta;
         if(getChildCount()==0){
-            int pos = findFirstVisiblePostion(state);
+            int pos = findFirstVisiblePosition(state, scrollDelta);
             for(int i=pos;i<state.getItemCount();i++){
-                if (!addChild(recycler, i, false)){
+                if (!addChild(recycler, i, false,scrollDelta)){
                     break;
                 }
             }
             delta = limitDeltaValue(delta);
         }else{
-            int startPos;
-            RecyclerView.LayoutParams params;
             boolean isLoadBefore = isReverseLayout()?(delta>0):(delta<0);
             if(isLoadBefore){//向下滚动，加载之前的Item
                 recycleChildren(recycler, false);
-                View firstChild = getChildAt(0);
-                params = (RecyclerView.LayoutParams) firstChild.getLayoutParams();
-                startPos = params.getViewAdapterPosition();
-                for(int i=startPos-1;i>=0;i--){
-                    if (!addChild(recycler,i,true)){
-                        break;
-                    }
-                }
+                fillViewStart(recycler, scrollDelta);
             }else{//向上滚动，加载更多的Item
                 recycleChildren(recycler, true);
-                View lastChild = getChildAt(getChildCount()-1);
-                params = (RecyclerView.LayoutParams)lastChild.getLayoutParams();
-                startPos = params.getViewAdapterPosition();
-                for(int i=startPos+1;i<state.getItemCount();i++){
-                    if (!addChild(recycler,i,false)){
-                        break;
-                    }
-                }
+                fillViewEnd(recycler, state, scrollDelta);
                 delta = limitDeltaValue(delta);
             }
         }
         return delta;
+    }
+
+    private void fillViewEnd(RecyclerView.Recycler recycler, RecyclerView.State state, int scrollDelta) {
+        View lastChild = getChildAt(getChildCount()-1);
+        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams)lastChild.getLayoutParams();
+        int startPos = params.getViewAdapterPosition();
+        for(int i=startPos+1;i<state.getItemCount();i++){
+            if (!addChild(recycler,i,false,scrollDelta)){
+                break;
+            }
+        }
+    }
+
+    private void fillViewStart(RecyclerView.Recycler recycler, int scrollDelta) {
+        View firstChild = getChildAt(0);
+        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) firstChild.getLayoutParams();
+        int startPos = params.getViewAdapterPosition();
+        for(int i=startPos-1;i>=0;i--){
+            if (!addChild(recycler,i,true,scrollDelta)){
+                break;
+            }
+        }
     }
 
     private int limitDeltaValue(int delta) {
@@ -182,7 +189,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         if(fromStart){
             for(int index =0;index<count;index++){
                 View child = getChildAt(index);
-                if(!isVisibleChild(child)){
+                if(!isVisibleChild(child,getScrollDelta())){
                     recycleViews.add(child);
                 }else {
                     break;
@@ -191,7 +198,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         }else{
             for(int index =count-1;index>=0;index--){
                 View child = getChildAt(index);
-                if(!isVisibleChild(child)){
+                if(!isVisibleChild(child,getScrollDelta())){
                     recycleViews.add(child);
                 }else {
                     break;
@@ -203,14 +210,14 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         }
     }
 
-    private boolean isVisibleChild(View child) {
+    private boolean isVisibleChild(View child,int scrollDelta) {
         RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
         int pos = params.getViewAdapterPosition();
         Pair<Rect,Rect> pair = mFlowSate.getRectAt(pos);
-        return pair==null||isVisibleRect(pair.second);
+        return pair==null||isVisibleRect(pair.second,scrollDelta);
     }
 
-    private int findFirstVisiblePostion(RecyclerView.State state) {
+    private int findFirstVisiblePosition(RecyclerView.State state, int scrollDelta) {
         for(int i=0;i<state.getItemCount();i++){
             Pair<Rect,Rect> rectPair = mFlowSate.getRectAt(i);
             int widthFactor = mFlowSource.widthFactorAt(i);
@@ -218,14 +225,14 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             if(rectPair==null){
                 rectPair = mFlowSate.addRect(widthFactor,heightFactor);
             }
-            if(isVisibleRect(rectPair.second)){
+            if(isVisibleRect(rectPair.second,scrollDelta)){
                 return i;
             }
         }
         return 0;
     }
 
-    private boolean addChild(RecyclerView.Recycler recycler,int i,boolean first) {
+    private boolean addChild(RecyclerView.Recycler recycler,int i,boolean first,int scrollDelta) {
         Pair<Rect,Rect> rectPair = mFlowSate.getRectAt(i);
         if(rectPair==null){
             if(mFlowSource ==null) return false;
@@ -233,7 +240,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             int heightFactor = mFlowSource.heightFactorAt(i);
             rectPair = mFlowSate.addRect(widthFactor,heightFactor);
         }
-        if(!isVisibleRect(rectPair.second)){
+        if(!isVisibleRect(rectPair.second,scrollDelta)){
             return false;
         }
         View view = recycler.getViewForPosition(i);
@@ -275,25 +282,25 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         return true;
     }
 
-    private boolean isVisibleRect(Rect rect){
+    private boolean isVisibleRect(Rect rect,int scrollDelta){
         if(getOrientation()==VERTICAL){
             if(isReverseLayout()){
-                int top = rect.top+getScrollDelta()+getHeight();
-                int bottom = rect.bottom+getScrollDelta()+getHeight();
+                int top = rect.top+scrollDelta+getHeight();
+                int bottom = rect.bottom+scrollDelta+getHeight();
                 return (top>=0&&top<=getHeight())||(bottom>=0&&bottom<=getHeight());
             }else{
-                int top = rect.top+getScrollDelta();
-                int bottom = rect.bottom+getScrollDelta();
+                int top = rect.top+scrollDelta;
+                int bottom = rect.bottom+scrollDelta;
                 return (top>=0&&top<=getHeight())||(bottom>=0&&bottom<=getHeight());
             }
         }else{
             if(isReverseLayout()){
-                int left = rect.left+getScrollDelta()+getWidth();
-                int right = rect.right+getScrollDelta()+getWidth();
+                int left = rect.left+scrollDelta+getWidth();
+                int right = rect.right+scrollDelta+getWidth();
                 return (left>=0&&left<=getWidth())||(right>=0&&right<=getWidth());
             }else{
-                int left = rect.left+getScrollDelta();
-                int right = rect.right+getScrollDelta();
+                int left = rect.left+scrollDelta;
+                int right = rect.right+scrollDelta;
                 return (left>=0&&left<=getWidth())||(right>=0&&right<=getWidth());
             }
         }
