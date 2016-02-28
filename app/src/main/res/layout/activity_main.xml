@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="alexclin.widget.recyclerview.demo.MainActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="10dip"
+        android:gravity="center">
+        <Button
+            android:id="@+id/btn_top_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:text="上->下"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:onClick="onClick"/>
+
+        <Button
+            android:id="@+id/btn_bottom_top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:text="下->上"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:layout_marginTop="20dip"
+            android:onClick="onClick"/>
+        <Button
+            android:id="@+id/btn_left_right"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:text="左->右"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:layout_marginTop="20dip"
+            android:onClick="onClick"/>
+        <Button
+            android:id="@+id/btn_right_left"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:text="右->左"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:layout_marginTop="20dip"
+            android:onClick="onClick"/>
+    </LinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>
