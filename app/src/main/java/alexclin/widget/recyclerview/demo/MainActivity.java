@@ -33,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager.HORIZONTAL);
                 intent.putExtra(DemoActivity.REVERSE_LAYOUT, true);
                 break;
+            case R.id.btn_test:
+                intent.putExtra(DemoActivity.ORIENTATION, -100);
+                break;
             default:
                 intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager.VERTICAL);
                 intent.putExtra(DemoActivity.REVERSE_LAYOUT, false);

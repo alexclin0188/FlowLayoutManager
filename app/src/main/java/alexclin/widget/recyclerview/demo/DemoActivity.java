@@ -29,7 +29,7 @@ public class DemoActivity extends Activity {
         int orentaion = getIntent().getIntExtra(ORIENTATION, FlowLayoutManager.VERTICAL);
         boolean reverse = getIntent().getBooleanExtra(REVERSE_LAYOUT, false);
         List<Item> list = Item.createList(orentaion);
-        RecyclerAdapter adapter = new RecyclerAdapter(list,orentaion,reverse);
+        FlowLayoutManager.Adapter adapter = orentaion==-100?new RecyclerPaddingAdapter():new RecyclerAdapter(list,orentaion,reverse);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.act_main_view_recycler);
         if(orentaion==FlowLayoutManager.HORIZONTAL){
             RelativeLayout.LayoutParams vlp = (RelativeLayout.LayoutParams) recyclerView.getLayoutParams();

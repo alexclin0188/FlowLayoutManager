@@ -59,11 +59,22 @@
             android:layout_marginTop="20dip"
             android:onClick="onClick"/>
         <Button
-            android:id="@+id/btn_right_left"
+        android:id="@+id/btn_right_left"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dip"
+        android:text="右->左"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="20dip"
+        android:onClick="onClick"/>
+
+        <Button
+            android:id="@+id/btn_test"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="5dip"
-            android:text="右->左"
+            android:text="上->下带Padding"
             android:textSize="20sp"
             android:textColor="@color/black"
             android:layout_marginTop="20dip"
