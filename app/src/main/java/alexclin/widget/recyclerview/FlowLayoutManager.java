@@ -3,6 +3,7 @@ package alexclin.widget.recyclerview;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.Pair;
@@ -335,6 +336,33 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
     @Override
     public void onRestoreInstanceState(Parcelable state) {
         //TODO
+    }
+
+    @Override
+    public void assertInLayoutOrScroll(String message) {
+        //TODO
+    }
+
+    @Override
+    public void scrollToPosition(int position) {
+        //TODO
+    }
+
+    @Override
+    public void onAdapterChanged(RecyclerView.Adapter oldAdapter, RecyclerView.Adapter newAdapter) {
+        //TODO
+    }
+
+    @Nullable
+    @Override
+    public View onFocusSearchFailed(View focused, int direction, RecyclerView.Recycler recycler, RecyclerView.State state) {
+        if(getChildCount()>0) return getChildAt(0);
+        return null;
+    }
+
+    @Override
+    public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
+        super.smoothScrollToPosition(recyclerView, state, position);
     }
 
     public interface FlowSource{
