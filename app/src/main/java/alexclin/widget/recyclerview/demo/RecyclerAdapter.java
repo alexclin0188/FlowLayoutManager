@@ -2,19 +2,18 @@ package alexclin.widget.recyclerview.demo;
 
 
 import android.content.res.Resources;
+import android.support.v7.widget.FlowLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import alexclin.widget.recyclerview.FlowLayoutManager2;
 
 import java.util.List;
 
 /**
  * @author alexclin on 16/2/26.
  */
-public class RecyclerAdapter extends FlowLayoutManager2.Adapter{
+public class RecyclerAdapter extends FlowLayoutManager.Adapter{
     private List<Item> mList;
 
     public RecyclerAdapter(List<Item> mList,int orientation,boolean reverse) {

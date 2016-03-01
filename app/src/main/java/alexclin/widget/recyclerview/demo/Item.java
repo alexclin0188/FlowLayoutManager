@@ -1,6 +1,6 @@
 package alexclin.widget.recyclerview.demo;
 
-import alexclin.widget.recyclerview.FlowLayoutManager2;
+import android.support.v7.widget.FlowLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class Item {
 
     public static List<Item> createList(int orientation){
         List<Item> items = new ArrayList<>();
-        if(orientation== FlowLayoutManager2.VERTICAL) {
+        if(orientation== FlowLayoutManager.VERTICAL) {
             items.add(new Item(0, 12, 6));
             items.add(new Item(1, 6, 3));
             items.add(new Item(2, 6, 6));
@@ -114,7 +114,7 @@ public class Item {
 
     public static List<Item> paddingList() {
         List<Item> items = new ArrayList<>();
-        items.add(new Item(0, 12, 6));
+//        items.add(new Item(0, 12, 6));
         items.add(new Item(1, 6, 3));
         items.add(new Item(2, 6, 6));
         items.add(new Item(4, 6, 6));

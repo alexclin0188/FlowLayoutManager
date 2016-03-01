@@ -1,12 +1,11 @@
-package alexclin.widget.recyclerview;
+package android.support.v7.widget;
 
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.OrientationHelper;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutParams;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +17,12 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * FlowLayoutManager2
+ * FlowLayoutManager
  *
  * @author alexclin
  * @date 16/2/27 16:19
  */
-public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
+public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
     private static final String TAG = "FlowLayoutManager1";
 
@@ -40,7 +39,7 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
 
     private boolean mRecycle = false;
 
-    public FlowLayoutManager2(Adapter flowSource) {
+    public FlowLayoutManager(Adapter flowSource) {
         this.mFlowSate = new FlowState(flowSource.totalFactor());
         this.mFlowSource = flowSource;
     }
@@ -196,6 +195,20 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
         int scrollDelta = mScrollDelta-delta;
         if(getChildCount()==0){
             int pos = findFirstVisiblePosition(state, scrollDelta);
+            if(pos==-1){
+                int max = getDirectionTotalValue();
+                scrollDelta = getDirectionValue()-max;
+                if(scrollDelta>0) scrollDelta = 0;
+                if(mScrollDelta<scrollDelta){
+                    int newDelta = mScrollDelta-scrollDelta;
+                    if(delta==0)
+                        offsetChildrenVertical(-newDelta);
+                    else
+                        delta = newDelta;
+                }
+                fillViewStart(recycler,state,scrollDelta);
+                return delta;
+            }
             for(int i=pos;i<state.getItemCount();i++){
                 if(isHeader(i)){
                     addHeader(recycler);
@@ -225,28 +238,33 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
     }
 
     private void fillViewEnd(RecyclerView.Recycler recycler, RecyclerView.State state, int scrollDelta) {
-        View lastChild = getChildAt(getChildCount()-1);
-        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams)lastChild.getLayoutParams();
+        View lastChild = getChildAt(getChildCount() - 1);
+        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) lastChild.getLayoutParams();
         int startPos = params.getViewAdapterPosition();
-        for(int i=startPos+1;i<state.getItemCount();i++){
-            if(isHeader(i)){
+        for (int i = startPos + 1; i < state.getItemCount(); i++) {
+            if (isHeader(i)) {
                 addHeader(recycler);
                 continue;
             }
-            if(isFooter(i, state)){
-                addFooter(recycler,state);
+            if (isFooter(i, state)) {
+                addFooter(recycler, state);
                 continue;
             }
-            if (!addFlowChild(recycler, i, false, scrollDelta)){
+            if (!addFlowChild(recycler, i, false, scrollDelta)) {
                 break;
             }
         }
     }
 
     private void fillViewStart(RecyclerView.Recycler recycler,RecyclerView.State state, int scrollDelta) {
-        View firstChild = getChildAt(0);
-        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) firstChild.getLayoutParams();
-        int startPos = params.getViewAdapterPosition();
+        int startPos;
+        if(getChildCount()>0){
+            View firstChild = getChildAt(0);
+            RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) firstChild.getLayoutParams();
+            startPos = params.getViewAdapterPosition();
+        }else{
+            startPos = state.getItemCount();
+        }
         for(int i=startPos-1;i>=0;i--){
             if(isHeader(i)){
                 addHeader(recycler);
@@ -255,17 +273,14 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
                 addFooter(recycler,state);
                 continue;
             }
-            if (!addFlowChild(recycler, i, false, scrollDelta)){
+            if (!addFlowChild(recycler, i, true, scrollDelta)){
                 break;
             }
         }
     }
 
     private int limitDeltaValue(int delta) {
-        int value = mFlowSate.getVertexDirectionMaxValue()+mFlowSource.getHeaderOffset()+mFlowSource.getFooterOffset();
-        if(value<getDirectionValue()){
-            value = getDirectionValue();
-        }
+        int value = getDirectionTotalValue();
         if(isReverseLayout()){
             if(mScrollDelta+getDirectionValue()-value-delta>0){
                 delta = mScrollDelta+getDirectionValue() - value;
@@ -276,6 +291,14 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
             }
         }
         return delta;
+    }
+
+    private int getDirectionTotalValue() {
+        int value = mFlowSate.getVertexDirectionMaxValue()+mFlowSource.getHeaderOffset()+mFlowSource.getFooterOffset();
+        if(value<getDirectionValue()){
+            value = getDirectionValue();
+        }
+        return value;
     }
 
     private void recycleChildren(RecyclerView.Recycler recycler,RecyclerView.State state,boolean fromStart){
@@ -316,7 +339,11 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
                 else
                     continue;
             }else if(isFooter(i,state)){
-                return i;
+                if(isVisibleRect(getFooterBaseRect(state),scrollDelta)){
+                    return i;
+                }else{
+                    return -1;
+                }
             }
             int index = convertToFlowIndex(i);
             Pair<Rect,Rect> rectPair = mFlowSate.getRectAt(index);
@@ -329,7 +356,7 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
                 return i;
             }
         }
-        return 0;
+        return -1;
     }
 
     private int convertToFlowIndex(int index){
@@ -378,21 +405,21 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
             if(isReverseLayout()){
                 int top = rect.top+scrollDelta+getHeight()-mFlowSource.getHeaderOffset();
                 int bottom = rect.bottom+scrollDelta+getHeight()-mFlowSource.getHeaderOffset();
-                return (top>=0&&top<=getHeight())||(bottom>=0&&bottom<=getHeight());
+                return (top>-1&&top<=getHeight())||(bottom>-1&&bottom<=getHeight());
             }else{
                 int top = rect.top+scrollDelta+mFlowSource.getHeaderOffset();
                 int bottom = rect.bottom+scrollDelta+mFlowSource.getHeaderOffset();
-                return (top>=0&&top<=getHeight())||(bottom>=0&&bottom<=getHeight());
+                return (top>-1&&top<=getHeight())||(bottom>-1&&bottom<=getHeight());
             }
         }else{
             if(isReverseLayout()){
                 int left = rect.left+scrollDelta+getWidth()-mFlowSource.getHeaderOffset();
                 int right = rect.right+scrollDelta+getWidth()-mFlowSource.getHeaderOffset();
-                return (left>=0&&left<=getWidth())||(right>=0&&right<=getWidth());
+                return (left>-1&&left<=getWidth())||(right>-1&&right<=getWidth());
             }else{
                 int left = rect.left+scrollDelta+mFlowSource.getHeaderOffset();
                 int right = rect.right+scrollDelta+mFlowSource.getHeaderOffset();
-                return (left>=0&&left<=getWidth())||(right>=0&&right<=getWidth());
+                return (left>-1&&left<=getWidth())||(right>-1&&right<=getWidth());
             }
         }
     }
@@ -466,6 +493,13 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
         //TODO
     }
 
+    @Override
+    public void onItemsChanged(RecyclerView recyclerView) {
+        clearLayout(recyclerView.mRecycler);
+        recyclerView.postInvalidate();
+        Log.e(TAG,"scroll:"+mScrollDelta);
+    }
+
     @Nullable
     @Override
     public View onFocusSearchFailed(View focused, int direction, RecyclerView.Recycler recycler, RecyclerView.State state) {
@@ -495,7 +529,7 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
         private int mHeaderValue;
         private int mFooterValue;
 
-        private FlowLayoutManager2 layoutManager;
+        private FlowLayoutManager layoutManager;
 
         private static final int TYPE_HEADER = -20160301;
         private static final int TYPE_FOOTER = -20160302;
@@ -531,7 +565,7 @@ public class FlowLayoutManager2 extends RecyclerView.LayoutManager {
 
         @Override
         public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-            layoutManager = new FlowLayoutManager2(this);
+            layoutManager = new FlowLayoutManager(this);
             recyclerView.setLayoutManager(layoutManager);
             super.onAttachedToRecyclerView(recyclerView);
         }

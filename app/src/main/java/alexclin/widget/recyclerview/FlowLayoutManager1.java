@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * FlowLayoutManager2
+ * FlowLayoutManager
  *
  * @author alexclin
  * @date 16/2/27 16:19

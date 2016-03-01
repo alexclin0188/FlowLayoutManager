@@ -2,6 +2,7 @@ package alexclin.widget.recyclerview.demo;
 
 
 import android.content.res.Resources;
+import android.support.v7.widget.FlowLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,12 +11,10 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import alexclin.widget.recyclerview.FlowLayoutManager2;
-
 /**
  * @author alexclin on 16/2/26.
  */
-public class RecyclerPaddingAdapter1 extends FlowLayoutManager2.Adapter {
+public class RecyclerPaddingAdapter1 extends FlowLayoutManager.Adapter {
     private List<Item> mList;
 
     public RecyclerPaddingAdapter1() {
@@ -61,6 +60,11 @@ public class RecyclerPaddingAdapter1 extends FlowLayoutManager2.Adapter {
         vh.mTv.setBackgroundColor(resources.getColor(item.getTextColor()));
         vh.mTv.setTextColor(resources.getColor(item.getBackgroundColor()));
         vh.mBtn.setVisibility(position == 0 ? View.VISIBLE : View.GONE);
+    }
+
+    public void updateList(List<Item> list) {
+        this.mList = list;
+        notifyDataSetChanged();
     }
 
 
