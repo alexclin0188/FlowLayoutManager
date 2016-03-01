@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import alexclin.widget.recyclerview.FlowLayoutManager;
+import alexclin.widget.recyclerview.FlowLayoutManager2;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,22 +22,22 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DemoActivity.class);
         switch (view.getId()) {
             case R.id.btn_bottom_top:
-                intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager.VERTICAL);
+                intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager2.VERTICAL);
                 intent.putExtra(DemoActivity.REVERSE_LAYOUT, true);
                 break;
             case R.id.btn_left_right:
-                intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager.HORIZONTAL);
+                intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager2.HORIZONTAL);
                 intent.putExtra(DemoActivity.REVERSE_LAYOUT, false);
                 break;
             case R.id.btn_right_left:
-                intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager.HORIZONTAL);
+                intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager2.HORIZONTAL);
                 intent.putExtra(DemoActivity.REVERSE_LAYOUT, true);
                 break;
             case R.id.btn_test:
                 intent.putExtra(DemoActivity.ORIENTATION, -100);
                 break;
             default:
-                intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager.VERTICAL);
+                intent.putExtra(DemoActivity.ORIENTATION, FlowLayoutManager2.VERTICAL);
                 intent.putExtra(DemoActivity.REVERSE_LAYOUT, false);
                 break;
         }

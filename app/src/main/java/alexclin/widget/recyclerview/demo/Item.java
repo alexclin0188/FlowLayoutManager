@@ -1,6 +1,6 @@
 package alexclin.widget.recyclerview.demo;
 
-import alexclin.widget.recyclerview.FlowLayoutManager;
+import alexclin.widget.recyclerview.FlowLayoutManager2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,14 +39,14 @@ public class Item {
 
     public static List<Item> createList(int orientation){
         List<Item> items = new ArrayList<>();
-        if(orientation== FlowLayoutManager.VERTICAL) {
+        if(orientation== FlowLayoutManager2.VERTICAL) {
             items.add(new Item(0, 12, 6));
             items.add(new Item(1, 6, 3));
             items.add(new Item(2, 6, 6));
             items.add(new Item(4, 6, 6));
             items.add(new Item(5, 3, 3));
             items.add(new Item(4, 3, 3));
-            //1
+            //1 -6
             items.add(new Item(0, 6, 3));
             items.add(new Item(1, 6, 2));
             items.add(new Item(2, 3, 4));
@@ -119,17 +119,20 @@ public class Item {
         items.add(new Item(2, 6, 6));
         items.add(new Item(4, 6, 6));
         items.add(new Item(5, 3, 3));
+
         items.add(new Item(4, 3, 3));
         //1
         items.add(new Item(0, 6, 3));
         items.add(new Item(1, 6, 2));
         items.add(new Item(2, 3, 4));
         items.add(new Item(4, 3, 4));
+
         items.add(new Item(1, 6, 3));
         items.add(new Item(2, 6, 6));
         items.add(new Item(4, 6, 6));
         items.add(new Item(5, 3, 3));
         items.add(new Item(4, 3, 3));
+
         items.add(new Item(0, 6, 3));
         return items;
     }

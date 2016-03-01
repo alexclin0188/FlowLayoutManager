@@ -7,23 +7,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import alexclin.widget.recyclerview.FlowLayoutManager;
+import alexclin.widget.recyclerview.FlowLayoutManager2;
 
 import java.util.List;
 
 /**
  * @author alexclin on 16/2/26.
  */
-public class RecyclerAdapter extends FlowLayoutManager.Adapter<RecyclerView.ViewHolder> {
+public class RecyclerAdapter extends FlowLayoutManager2.Adapter{
     private List<Item> mList;
 
     public RecyclerAdapter(List<Item> mList,int orientation,boolean reverse) {
-        super(orientation,reverse);
+        super(orientation, reverse);
         this.mList = mList;
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateFlowViewHolder(ViewGroup parent, int viewType) {
         View itemView = View.inflate(parent.getContext(),R.layout.item_view,null);
         return new ViewHolder(itemView);
     }
@@ -39,23 +39,27 @@ public class RecyclerAdapter extends FlowLayoutManager.Adapter<RecyclerView.View
     }
 
     @Override
-    public int getItemCount() {
-        return mList==null?0:mList.size();
-    }
-
-    @Override
     public int totalFactor() {
         return 12;
     }
 
     @Override
     public int widthFactorAt(int position) {
-        return mList.get(position).getWidth();
+        return getItem(position).getWidth();
     }
 
     @Override
     public int heightFactorAt(int position) {
-        return mList.get(position).getHeight();
+        return getItem(position).getHeight();
+    }
+
+    @Override
+    public int getFlowCount() {
+        return mList==null?0:mList.size();
+    }
+
+    private Item getItem(int position){
+        return mList.get(position);
     }
 
     private static class ViewHolder extends RecyclerView.ViewHolder{
