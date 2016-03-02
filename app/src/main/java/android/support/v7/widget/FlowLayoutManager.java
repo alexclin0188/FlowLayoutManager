@@ -201,9 +201,13 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
                 if(scrollDelta>0) scrollDelta = 0;
                 if(mScrollDelta<scrollDelta){
                     int newDelta = mScrollDelta-scrollDelta;
-                    if(delta==0)
-                        offsetChildrenVertical(-newDelta);
-                    else
+                    if(delta==0){
+                        if(getOrientation()==VERTICAL){
+                            offsetChildrenVertical(-newDelta);
+                        }else{
+                            offsetChildrenHorizontal(-newDelta);
+                        }
+                    }else
                         delta = newDelta;
                 }
                 fillViewStart(recycler,state,scrollDelta);

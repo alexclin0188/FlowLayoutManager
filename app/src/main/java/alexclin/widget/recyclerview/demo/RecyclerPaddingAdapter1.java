@@ -59,7 +59,7 @@ public class RecyclerPaddingAdapter1 extends FlowLayoutManager.Adapter {
         vh.mTv.setText((position+1)+"");
         vh.mTv.setBackgroundColor(resources.getColor(item.getTextColor()));
         vh.mTv.setTextColor(resources.getColor(item.getBackgroundColor()));
-        vh.mBtn.setVisibility(position == 0 ? View.VISIBLE : View.GONE);
+        vh.mBtn.setVisibility((position == 0||position==3||position==12||position==2) ? View.VISIBLE : View.GONE);
     }
 
     public void updateList(List<Item> list) {
@@ -71,12 +71,12 @@ public class RecyclerPaddingAdapter1 extends FlowLayoutManager.Adapter {
     private static class ViewHolder extends RecyclerView.ViewHolder{
 
         private TextView mTv;
-        private Button mBtn;
+        private View mBtn;
 
         public ViewHolder(View itemView) {
             super(itemView);
             mTv = (TextView) itemView.findViewById(R.id.item_tv);
-            mBtn = (Button) itemView.findViewById(R.id.item_btn);
+            mBtn = itemView.findViewById(R.id.item_btn);
         }
     }
 }

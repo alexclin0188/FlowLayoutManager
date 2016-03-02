@@ -18,15 +18,13 @@
               android:textSize="20sp"
         />
 
-    <Button
+    <ImageView
         android:id="@+id/item_btn"
-        android:layout_width="30dip"
-        android:layout_height="wrap_content"
-        android:text="1\n1\n1"
+        android:layout_width="60dip"
+        android:layout_height="90dip"
         android:layout_marginRight="10dip"
-        android:textColor="@color/colorPrimary"
-        android:textSize="20sp"
         android:layout_gravity="right|top"
-        android:layout_marginTop="-40dp"
-        android:background="@color/colorAccent"/>
+        android:layout_marginTop="-50dp"
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="fitXY"/>
 </FrameLayout>
