@@ -1,11 +1,12 @@
 package android.support.v7.widget;
 
+import android.content.Context;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.LayoutParams;
-import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
-    private static final String TAG = "FlowLayoutManager1";
+    private static final String TAG = "FlowLayoutManager";
 
     private static final boolean DEBUG = true;
 
@@ -107,19 +108,23 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         }
         mRecycle = true;
         delta = fillView(delta, recycler, state);
-        if(getOrientation()==VERTICAL) {
-            offsetChildrenVertical(-delta);
-        }else{
-            offsetChildrenHorizontal(-delta);
-        }
+        offsetContent(delta);
         return delta;
+    }
+
+    private void offsetContent(int newDelta) {
+        if(getOrientation()==VERTICAL){
+            offsetChildrenVertical(-newDelta);
+        }else{
+            offsetChildrenHorizontal(-newDelta);
+        }
     }
 
     private void addFooter(RecyclerView.Recycler recycler,RecyclerView.State state) {
         View footer = recycler.getViewForPosition(state.getItemCount()-1);
         addView(footer);
         measureChildWithMargins(footer, 0, 0);
-        Rect rect = getLayoutRect(getFooterBaseRect(state),0);
+        Rect rect = getLayoutRect(getFooterBaseRect(),mFlowSource.getHeaderOffset());
         layoutDecorated(footer, rect.left, rect.top, rect.right, rect.bottom);
     }
 
@@ -127,7 +132,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         return mFlowSource.hasFooter()&&i==state.getItemCount()-1;
     }
 
-    private Rect getFooterBaseRect(RecyclerView.State state) {
+    private Rect getFooterBaseRect() {
+        checkFlowStateIndex(mFlowSource.getFlowCount()-1);
         int maxValue = mFlowSate.getVertexDirectionMaxValue()+mFlowSource.getHeaderOffset();
         boolean isV = getOrientation()==VERTICAL;
         int top = isV?maxValue:0;
@@ -136,6 +142,16 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         int right = isV?getWidth():left+mFlowSource.getFooterOffset();
         Rect rect = new Rect(left,top,right,bottom);
         return isReverseLayout()?reverseRect(rect):rect;
+    }
+
+    private void checkFlowStateIndex(int flowIndex) {
+        if(flowIndex<0) return;
+        if(flowIndex>mFlowSource.getFlowCount()-1) flowIndex = mFlowSource.getFlowCount()-1;
+        if(mFlowSate.getRectAt(flowIndex)!=null) return;
+        int start = mFlowSate.getRectSize()>0?mFlowSate.getRectSize()-1:0;
+        for(int i=start;i<mFlowSource.getFlowCount();i++){
+            mFlowSate.addRect(mFlowSource.widthFactorAt(i),mFlowSource.heightFactorAt(i));
+        }
     }
 
     private void addHeader(RecyclerView.Recycler recycler) {
@@ -196,17 +212,13 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         if(getChildCount()==0){
             int pos = findFirstVisiblePosition(state, scrollDelta);
             if(pos==-1){
-                int max = getDirectionTotalValue();
+                int max = getLayoutDirectionTotalValue();
                 scrollDelta = getDirectionValue()-max;
                 if(scrollDelta>0) scrollDelta = 0;
                 if(mScrollDelta<scrollDelta){
                     int newDelta = mScrollDelta-scrollDelta;
                     if(delta==0){
-                        if(getOrientation()==VERTICAL){
-                            offsetChildrenVertical(-newDelta);
-                        }else{
-                            offsetChildrenHorizontal(-newDelta);
-                        }
+                        offsetContent(newDelta);
                     }else
                         delta = newDelta;
                 }
@@ -284,7 +296,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private int limitDeltaValue(int delta) {
-        int value = getDirectionTotalValue();
+        int value = getLayoutDirectionTotalValue();
         if(isReverseLayout()){
             if(mScrollDelta+getDirectionValue()-value-delta>0){
                 delta = mScrollDelta+getDirectionValue() - value;
@@ -297,7 +309,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         return delta;
     }
 
-    private int getDirectionTotalValue() {
+    private int getLayoutDirectionTotalValue() {
         int value = mFlowSate.getVertexDirectionMaxValue()+mFlowSource.getHeaderOffset()+mFlowSource.getFooterOffset();
         if(value<getDirectionValue()){
             value = getDirectionValue();
@@ -343,13 +355,13 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
                 else
                     continue;
             }else if(isFooter(i,state)){
-                if(isVisibleRect(getFooterBaseRect(state),scrollDelta)){
+                if(isVisibleRect(getFooterBaseRect(),scrollDelta)){
                     return i;
                 }else{
                     return -1;
                 }
             }
-            int index = convertToFlowIndex(i);
+            int index = itemIndexToFlowIndex(i);
             Pair<Rect,Rect> rectPair = mFlowSate.getRectAt(index);
             if(rectPair==null){
                 int widthFactor = mFlowSource.widthFactorAt(index);
@@ -363,12 +375,16 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         return -1;
     }
 
-    private int convertToFlowIndex(int index){
+    private int itemIndexToFlowIndex(int index){
         return mFlowSource.hasHeader()?index-1:index;
     }
 
+    private int flowIndexToItemIndex(int index){
+        return mFlowSource.hasHeader()?index+1:index;
+    }
+
     private boolean addFlowChild(RecyclerView.Recycler recycler, int i, boolean first, int scrollDelta) {
-        int index = convertToFlowIndex(i);
+        int index = itemIndexToFlowIndex(i);
         Pair<Rect,Rect> rectPair = mFlowSate.getRectAt(index);
         if(rectPair==null){
             if(mFlowSource ==null) return false;
@@ -388,7 +404,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         else
             addView(view);
         measureChildWithMargins(view, 0, 0);
-        Rect layoutRect = getLayoutRect(rectPair.second,mFlowSource.getHeaderOffset());
+        Rect layoutRect = getLayoutRect(rectPair.second, mFlowSource.getHeaderOffset());
         layoutDecorated(view, layoutRect.left, layoutRect.top, layoutRect.right, layoutRect.bottom);
         return true;
     }
@@ -399,7 +415,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         if(isHeader(pos))
             return isVisibleRect(getHeaderBaseRect(),scrollDelta);
         if(isFooter(pos,state))
-            return isVisibleRect(getFooterBaseRect(state),scrollDelta);
+            return isVisibleRect(getFooterBaseRect(),scrollDelta);
         Pair<Rect,Rect> pair = mFlowSate.getRectAt(pos);
         return pair==null||isVisibleRect(pair.second,scrollDelta);
     }
@@ -483,25 +499,103 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
     }
 
     @Override
-    public void assertInLayoutOrScroll(String message) {
-        //TODO
+    public void scrollToPosition(int position) {
+        offsetContent(calculateScrollDelta(position));
     }
 
     @Override
-    public void scrollToPosition(int position) {
-        //TODO
+    public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state,
+                                       int position) {
+        LinearSmoothScroller linearSmoothScroller =
+                new LinearSmoothScroller(recyclerView.getContext()) {
+                    @Override
+                    public PointF computeScrollVectorForPosition(int targetPosition) {
+                        return FlowLayoutManager.this
+                                .computeScrollVectorForPosition(targetPosition);
+                    }
+                };
+        linearSmoothScroller.setTargetPosition(position);
+        startSmoothScroll(linearSmoothScroller);
+    }
+
+    private PointF computeScrollVectorForPosition(int targetPosition) {
+        if (getChildCount() == 0) {
+            return null;
+        }
+        final int firstChildPos = getPosition(getChildAt(0));
+        final int direction = targetPosition < firstChildPos != isReverseLayout() ? -1 : 1;
+        if (getOrientation() == HORIZONTAL) {
+            return new PointF(direction, 0);
+        } else {
+            return new PointF(0, direction);
+        }
+    }
+
+    private int calculateScrollDelta(int position){
+        int delta = 0;
+        if(position>=0&&position<getItemCount()){
+            if(position==0){
+                delta = mScrollDelta;
+            }else{
+                Rect posRect;
+                if(mFlowSource.hasFooter()&&position==getItemCount()-1){
+                    posRect = getLayoutRect(getFooterBaseRect(),mFlowSource.getHeaderOffset());
+                }else{
+                    int index = itemIndexToFlowIndex(position);
+                    checkFlowStateIndex(index);
+                    Pair<Rect,Rect> pair = mFlowSate.getRectAt(index);
+                    if(pair!=null){
+                        posRect = getLayoutRect(pair.second,mFlowSource.getHeaderOffset());
+                    }else{
+                        return 0;
+                    }
+                }
+                if(getOrientation()==VERTICAL){
+                    if(isReverseLayout()){
+                        delta = mScrollDelta+posRect.top;
+                    }else{
+                        delta = getDirectionValue()-posRect.bottom-mScrollDelta;
+                    }
+                }else{
+                    if (isReverseLayout())
+                        delta = getDirectionValue()-posRect.right-mScrollDelta;
+                    else
+                        delta = mScrollDelta + posRect.left;
+                }
+            }
+        }
+        return delta;
     }
 
     @Override
     public void onAdapterChanged(RecyclerView.Adapter oldAdapter, RecyclerView.Adapter newAdapter) {
-        //TODO
+        //ignore
     }
 
     @Override
     public void onItemsChanged(RecyclerView recyclerView) {
         clearLayout(recyclerView.mRecycler);
         recyclerView.postInvalidate();
-        Log.e(TAG,"scroll:"+mScrollDelta);
+    }
+
+    @Override
+    public void onItemsAdded(RecyclerView recyclerView, int positionStart, int itemCount) {
+        onItemsChanged(recyclerView);
+    }
+
+    @Override
+    public void onItemsRemoved(RecyclerView recyclerView, int positionStart, int itemCount) {
+        onItemsChanged(recyclerView);
+    }
+
+    @Override
+    public void onItemsUpdated(RecyclerView recyclerView, int positionStart, int itemCount) {
+        onItemsChanged(recyclerView);
+    }
+
+    @Override
+    public void onItemsMoved(RecyclerView recyclerView, int from, int to, int itemCount) {
+        onItemsChanged(recyclerView);
     }
 
     @Nullable
@@ -511,10 +605,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         return null;
     }
 
-    @Override
-    public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
-        super.smoothScrollToPosition(recyclerView, state, position);
-    }
+
 
     private static class InnerHolder extends RecyclerView.ViewHolder{
         private int type;
@@ -706,6 +797,10 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         public void clearRect(){
             mRectList.clear();
             mVertexPoints.clear();
+        }
+
+        public int getRectSize(){
+            return mRectList.size();
         }
 
         /**
