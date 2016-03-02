@@ -6,43 +6,16 @@ import android.support.v7.widget.FlowLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
-
-import java.util.List;
 
 /**
  * @author alexclin on 16/2/26.
  */
-public class RecyclerPaddingAdapter1 extends FlowLayoutManager.Adapter {
-    private List<Item> mList;
+public class RecyclerPaddingAdapter extends RecyclerAdapter {
 
-    public RecyclerPaddingAdapter1() {
+    public RecyclerPaddingAdapter() {
+        super(null,FlowLayoutManager.VERTICAL,false);
         this.mList = Item.paddingList();
-    }
-
-    private Item getItem(int position){
-        return mList.get(position);
-    }
-
-    @Override
-    public int totalFactor() {
-        return 12;
-    }
-
-    @Override
-    public int widthFactorAt(int position) {
-        return getItem(position).getWidth();
-    }
-
-    @Override
-    public int heightFactorAt(int position) {
-        return getItem(position).getHeight();
-    }
-
-    @Override
-    public int getFlowCount() {
-        return mList!=null?mList.size():0;
     }
 
     @Override
@@ -59,14 +32,8 @@ public class RecyclerPaddingAdapter1 extends FlowLayoutManager.Adapter {
         vh.mTv.setText((position+1)+"");
         vh.mTv.setBackgroundColor(resources.getColor(item.getTextColor()));
         vh.mTv.setTextColor(resources.getColor(item.getBackgroundColor()));
-        vh.mBtn.setVisibility((position == 0||position==3||position==12||position==2) ? View.VISIBLE : View.GONE);
+        vh.mBtn.setVisibility((position == 0 || position == 3 || position == 12 || position == 2) ? View.VISIBLE : View.GONE);
     }
-
-    public void updateList(List<Item> list) {
-        this.mList = list;
-        notifyDataSetChanged();
-    }
-
 
     private static class ViewHolder extends RecyclerView.ViewHolder{
 

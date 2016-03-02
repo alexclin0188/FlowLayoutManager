@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,6 +27,14 @@
             android:text="22222"
             android:id="@+id/btn2"
             android:onClick="onClick"/>
+
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:text="Scroll"
+            android:id="@+id/btn3"
+            android:onClick="onClick"/>
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
@@ -35,6 +42,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/top_layout"
-        android:clipChildren="false"
-        android:clipToPadding="false"/>
+        android:clipChildren="false"/>
 </RelativeLayout>

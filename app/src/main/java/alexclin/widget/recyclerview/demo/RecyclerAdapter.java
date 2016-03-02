@@ -14,7 +14,7 @@ import java.util.List;
  * @author alexclin on 16/2/26.
  */
 public class RecyclerAdapter extends FlowLayoutManager.Adapter{
-    private List<Item> mList;
+    protected List<Item> mList;
 
     public RecyclerAdapter(List<Item> mList,int orientation,boolean reverse) {
         super(orientation, reverse);
@@ -59,6 +59,11 @@ public class RecyclerAdapter extends FlowLayoutManager.Adapter{
 
     private Item getItem(int position){
         return mList.get(position);
+    }
+
+    public void updateList(List<Item> list) {
+        this.mList = list;
+        notifyDataSetChanged();
     }
 
     private static class ViewHolder extends RecyclerView.ViewHolder{
