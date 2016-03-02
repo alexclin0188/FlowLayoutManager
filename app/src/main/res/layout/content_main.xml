@@ -18,15 +18,17 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:text="111111"
-            android:onClick="onClick"/>
+            android:text="LongList"
+            android:onClick="onClick"
+            android:layout_margin="3dip"/>
         <Button
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:text="22222"
+            android:text="ShortList"
             android:id="@+id/btn2"
-            android:onClick="onClick"/>
+            android:onClick="onClick"
+            android:layout_margin="3dip"/>
 
         <Button
             android:layout_width="0dip"
@@ -34,7 +36,8 @@
             android:layout_weight="1.0"
             android:text="Scroll"
             android:id="@+id/btn3"
-            android:onClick="onClick"/>
+            android:onClick="onClick"
+            android:layout_margin="3dip"/>
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView

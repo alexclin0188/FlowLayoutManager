@@ -70,15 +70,16 @@ public class DemoActivity extends Activity {
         switch (view.getId()){
             case R.id.btn1:
                 paddingAdapter.updateList(Item.createList(FlowLayoutManager.VERTICAL));
-                Toast.makeText(this,"1111111",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"LongList:"+paddingAdapter.getFlowCount(),Toast.LENGTH_SHORT).show();
                 break;
             case R.id.btn2:
                 paddingAdapter.updateList(Item.paddingList());
-                Toast.makeText(this,"2222222",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"ShortList:"+paddingAdapter.getFlowCount(),Toast.LENGTH_SHORT).show();
                 break;
             case R.id.btn3:
-                mRecyclerView.smoothScrollToPosition(1);
-                Toast.makeText(this,"SmoothScrollTo 15",Toast.LENGTH_SHORT).show();
+                int position = 1;
+                mRecyclerView.smoothScrollToPosition(position);
+                Toast.makeText(this,"SmoothScrollTo:"+position,Toast.LENGTH_SHORT).show();
                 break;
         }
     }

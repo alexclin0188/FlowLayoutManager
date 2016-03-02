@@ -379,10 +379,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         return mFlowSource.hasHeader()?index-1:index;
     }
 
-    private int flowIndexToItemIndex(int index){
-        return mFlowSource.hasHeader()?index+1:index;
-    }
-
     private boolean addFlowChild(RecyclerView.Recycler recycler, int i, boolean first, int scrollDelta) {
         int index = itemIndexToFlowIndex(i);
         Pair<Rect,Rect> rectPair = mFlowSate.getRectAt(index);
@@ -416,7 +412,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             return isVisibleRect(getHeaderBaseRect(),scrollDelta);
         if(isFooter(pos,state))
             return isVisibleRect(getFooterBaseRect(),scrollDelta);
-        Pair<Rect,Rect> pair = mFlowSate.getRectAt(pos);
+        Pair<Rect,Rect> pair = mFlowSate.getRectAt(itemIndexToFlowIndex(pos));
         return pair==null||isVisibleRect(pair.second,scrollDelta);
     }
 
@@ -605,8 +601,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         return null;
     }
 
-
-
     private static class InnerHolder extends RecyclerView.ViewHolder{
         private int type;
 
@@ -673,10 +667,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
         @Override
         public final void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List<Object> payloads) {
-            if(mHeaderView!=null&&position==0){
-                setHeaderFooterParams(holder,mHeaderValue);
-            }else if(mFooterView!=null&&position==getItemCount()-1){
-                setHeaderFooterParams(holder,mFooterValue);
+            if(holder instanceof InnerHolder){
+                setHeaderFooterParams((InnerHolder) holder);
             }else{
                 onBindViewHolder(holder,realPosition(position));
             }
@@ -686,7 +678,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             return hasHeader()?position-1:position;
         }
 
-        private void setHeaderFooterParams(RecyclerView.ViewHolder holder, int value) {
+        private void setHeaderFooterParams(InnerHolder holder) {
+            int value = holder.type==TYPE_HEADER?mHeaderValue:mFooterValue;
             int notDirectionValue = layoutManager.getNotDirectionValue();
             int width = orientation==VERTICAL?notDirectionValue:value;
             int height = orientation==VERTICAL?value:notDirectionValue;
@@ -738,6 +731,21 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         public final void setFooter(View footer,int footerHeight){
             mFooterView = footer;
             mFooterValue = footerHeight;
+            notifyDataSetChanged();
+        }
+
+        private int dip2px(View view,float dpValue) {
+            if(view==null) return 0;
+            final float scale = view.getResources().getDisplayMetrics().density;
+            return (int) (dpValue * scale + 0.5f);
+        }
+
+        public final void setHeaderDip(View header,int headerDip){
+            setHeader(header,dip2px(header,headerDip));
+        }
+
+        public final void setFooterDip(View footer,int footerDip){
+            setFooter(footer,dip2px(footer,footerDip));
         }
 
         public int getHeaderOffset(){
@@ -754,11 +762,11 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             return 0;
         }
 
-        private boolean hasHeader(){
+        public boolean hasHeader(){
             return mHeaderView!=null;
         }
 
-        private boolean hasFooter(){
+        public boolean hasFooter(){
             return mFooterView!=null;
         }
 
