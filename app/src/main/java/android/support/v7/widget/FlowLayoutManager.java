@@ -6,7 +6,6 @@ import android.graphics.Rect;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.LayoutParams;
-import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -122,10 +121,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
     private void addFooter(RecyclerView.Recycler recycler,RecyclerView.State state) {
         View footer = recycler.getViewForPosition(state.getItemCount()-1);
-        addView(footer);
-        measureChildWithMargins(footer, 0, 0);
-        Rect rect = getLayoutRect(getFooterBaseRect(),mFlowSource.getHeaderOffset());
-        layoutDecorated(footer, rect.left, rect.top, rect.right, rect.bottom);
+        measureAndLayoutChild(footer,getFooterBaseRect(),false,mFlowSource.getHeaderOffset());
     }
 
     private boolean isFooter(int i, RecyclerView.State state) {
@@ -156,10 +152,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
     private void addHeader(RecyclerView.Recycler recycler) {
         View header = recycler.getViewForPosition(0);
-        addView(header,0);
-        measureChildWithMargins(header, 0, 0);
-        Rect rect = getLayoutRect(getHeaderBaseRect(),0);
-        layoutDecorated(header, rect.left, rect.top, rect.right, rect.bottom);
+        measureAndLayoutChild(header, getHeaderBaseRect(),true, 0);
     }
 
     private boolean isHeader(int i) {
@@ -393,17 +386,22 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             return false;
         }
         View view = recycler.getViewForPosition(i);
+        measureAndLayoutChild(view, rectPair.second, first, mFlowSource.getHeaderOffset());
+        return true;
+    }
+
+    private void measureAndLayoutChild(View view, Rect rect, boolean addFirst, int offset){
         RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) view.getLayoutParams();
-        params.width = rectPair.second.width();
-        params.height = rectPair.second.height();
-        if(first)
+        params.width = rect.width()-params.leftMargin-params.rightMargin;
+        params.height = rect.height()-params.topMargin-params.bottomMargin;
+        if(addFirst)
             addView(view,0);
         else
             addView(view);
-        measureChildWithMargins(view, 0, 0);
-        Rect layoutRect = getLayoutRect(rectPair.second, mFlowSource.getHeaderOffset());
-        layoutDecorated(view, layoutRect.left, layoutRect.top, layoutRect.right, layoutRect.bottom);
-        return true;
+        measureChildWithMargins(view, params.leftMargin+params.bottomMargin, params.topMargin+params.bottomMargin);
+        Rect layoutRect = getLayoutRect(rect, offset);
+        layoutDecorated(view, layoutRect.left + params.leftMargin, layoutRect.top + params.topMargin,
+                layoutRect.right - params.rightMargin, layoutRect.bottom - params.bottomMargin);
     }
 
     private boolean isVisibleChild(View child,RecyclerView.State state,int scrollDelta) {
