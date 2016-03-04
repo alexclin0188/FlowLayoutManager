@@ -45,5 +45,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/top_layout"
-        android:clipChildren="false"/>
+        android:clipChildren="false"
+        android:padding="30dip"/>
 </RelativeLayout>

@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 import android.support.v7.widget.FlowLayoutManager;
@@ -16,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        Log.e("", "D:" + getResources().getDisplayMetrics().density);
     }
 
     public void onClick(View view) {
@@ -42,5 +45,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         startActivity(intent);
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        Log.e("1234", "D:" + dm.density+",sd:"+dm.scaledDensity);
     }
 }

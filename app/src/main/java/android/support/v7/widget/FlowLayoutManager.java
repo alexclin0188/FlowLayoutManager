@@ -1,12 +1,12 @@
 package android.support.v7.widget;
 
-import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.LayoutParams;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +41,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
     private boolean mRecycle = false;
 
     public FlowLayoutManager(Adapter flowSource) {
-        this.mFlowSate = new FlowState(flowSource.totalFactor());
+        this.mFlowSate = new FlowState();
         this.mFlowSource = flowSource;
     }
 
@@ -138,8 +138,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         boolean isV = getOrientation()==VERTICAL;
         int top = isV?maxValue:0;
         int left = isV?0:maxValue;
-        int bottom = isV?top+mFlowSource.getFooterOffset():getHeight();
-        int right = isV?getWidth():left+mFlowSource.getFooterOffset();
+        int bottom = isV?top+mFlowSource.getFooterOffset():getNotDirectionValue();
+        int right = isV?getNotDirectionValue():left+mFlowSource.getFooterOffset();
         Rect rect = new Rect(left,top,right,bottom);
         return isReverseLayout()?reverseRect(rect):rect;
     }
@@ -168,7 +168,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
     private Rect getHeaderBaseRect(){
         boolean isV = getOrientation()==VERTICAL;
-        Rect headerRect = new Rect(0,0,isV?getWidth():mFlowSource.getHeaderOffset(),isV?mFlowSource.getHeaderOffset():getHeight());
+        Rect headerRect = new Rect(0,0,isV?getNotDirectionValue():mFlowSource.getHeaderOffset(),isV?mFlowSource.getHeaderOffset():getNotDirectionValue());
         return isReverseLayout()?reverseRect(headerRect):headerRect;
     }
 
@@ -176,27 +176,27 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         int left,right,top,bottom;
         if(getOrientation()==VERTICAL){
             if(isReverseLayout()){
-                left = realRect.left;
-                right = realRect.right;
+                left = realRect.left+getPaddingLeft();
+                right = realRect.right+getPaddingLeft();
                 top = realRect.top+ mScrollDelta+getHeight()-delta;
                 bottom = realRect.bottom+ mScrollDelta+getHeight()-delta;
             }else{
-                left = realRect.left;
-                right = realRect.right;
-                top = realRect.top+ mScrollDelta+delta;
-                bottom = realRect.bottom+ mScrollDelta+delta;
+                left = realRect.left+getPaddingLeft();
+                right = realRect.right+getPaddingLeft();
+                top = realRect.top+ mScrollDelta+delta+getPaddingTop();
+                bottom = realRect.bottom+ mScrollDelta+delta+getPaddingTop();
             }
         }else{
             if(isReverseLayout()){
-                left = realRect.left+ mScrollDelta+getWidth()-delta;
-                right = realRect.right+ mScrollDelta+getWidth()-delta;
-                top = realRect.top;
-                bottom = realRect.bottom;
+                left = realRect.left+ mScrollDelta+getWidth()-delta+getPaddingLeft();
+                right = realRect.right+ mScrollDelta+getWidth()-delta+getPaddingLeft();
+                top = realRect.top+getPaddingTop();
+                bottom = realRect.bottom+getPaddingTop();
             }else{
-                left = realRect.left+ mScrollDelta+delta;
-                right = realRect.right+ mScrollDelta+delta;
-                top = realRect.top;
-                bottom = realRect.bottom;
+                left = realRect.left+ mScrollDelta+delta+getPaddingLeft();
+                right = realRect.right+ mScrollDelta+delta+getPaddingLeft();
+                top = realRect.top+getPaddingTop();
+                bottom = realRect.bottom+getPaddingTop();
             }
         }
         return new Rect(left,top,right,bottom);
@@ -207,6 +207,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             oldDirectionValue = getDirectionValue();
         }else if(oldDirectionValue !=getDirectionValue()){
             clearLayout(recycler);
+            oldDirectionValue = getDirectionValue();
         }
         int scrollDelta = mScrollDelta-delta;
         if(getChildCount()==0){
@@ -282,7 +283,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             startPos = state.getItemCount();
         }
         for(int i=startPos-1;i>=0;i--){
-            if(isHeader(i)){
+            if (isHeader(i)){
                 addHeader(recycler);
                 continue;
             }else if(isFooter(i, state)){
@@ -341,7 +342,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             }
         }
         for(View child:recycleViews){
-            removeAndRecycleView(child,recycler);
+            removeAndRecycleView(child, recycler);
         }
     }
 
@@ -418,24 +419,26 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
     private boolean isVisibleRect(Rect rect,int scrollDelta){
         if(getOrientation()==VERTICAL){
+            int height = getDirectionValue();
             if(isReverseLayout()){
-                int top = rect.top+scrollDelta+getHeight()-mFlowSource.getHeaderOffset();
-                int bottom = rect.bottom+scrollDelta+getHeight()-mFlowSource.getHeaderOffset();
-                return (top>-1&&top<=getHeight())||(bottom>-1&&bottom<=getHeight());
+                int top = rect.top+scrollDelta+height-mFlowSource.getHeaderOffset();
+                int bottom = rect.bottom+scrollDelta+height-mFlowSource.getHeaderOffset();
+                return (top>-1&&top<=height)||(bottom>-1&&bottom<=height);
             }else{
                 int top = rect.top+scrollDelta+mFlowSource.getHeaderOffset();
                 int bottom = rect.bottom+scrollDelta+mFlowSource.getHeaderOffset();
-                return (top>-1&&top<=getHeight())||(bottom>-1&&bottom<=getHeight());
+                return (top>-1&&top<=height)||(bottom>-1&&bottom<=height);
             }
         }else{
+            int width = getWidth();
             if(isReverseLayout()){
-                int left = rect.left+scrollDelta+getWidth()-mFlowSource.getHeaderOffset();
-                int right = rect.right+scrollDelta+getWidth()-mFlowSource.getHeaderOffset();
-                return (left>-1&&left<=getWidth())||(right>-1&&right<=getWidth());
+                int left = rect.left+scrollDelta+width-mFlowSource.getHeaderOffset();
+                int right = rect.right+scrollDelta+width-mFlowSource.getHeaderOffset();
+                return (left>-1&&left<=width)||(right>-1&&right<=width);
             }else{
                 int left = rect.left+scrollDelta+mFlowSource.getHeaderOffset();
                 int right = rect.right+scrollDelta+mFlowSource.getHeaderOffset();
-                return (left>-1&&left<=getWidth())||(right>-1&&right<=getWidth());
+                return (left>-1&&left<=width)||(right>-1&&right<=width);
             }
         }
     }
@@ -444,12 +447,16 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         return mScrollDelta;
     }
 
-    private int getDirectionValue(){
+    private int getDirectionValueWithPadding(){
         return getOrientation()==VERTICAL?getHeight():getWidth();
     }
 
+    private int getDirectionValue(){
+        return getOrientation()==VERTICAL?getHeight()-getPaddingTop()-getPaddingBottom():getWidth()-getPaddingLeft() -getPaddingRight();
+    }
+
     private int getNotDirectionValue() {
-        return getOrientation() != VERTICAL ? getHeight() : getWidth();
+        return getOrientation() != VERTICAL ? getHeight()-getPaddingTop()-getPaddingBottom() : getWidth()-getPaddingLeft()-getPaddingRight();
     }
     /**
     * 根据方向反转矩形
@@ -644,6 +651,10 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             return reverseLayout;
         }
 
+        protected int getUnitValue(){
+            return layoutManager.getNotDirectionValue()/totalFactor();
+        }
+
         @Override
         public final RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if(viewType==TYPE_HEADER||viewType==TYPE_FOOTER){
@@ -710,7 +721,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             }else if(mFooterView!=null&&position==getItemCount()-1){
                 return TYPE_FOOTER;
             }else{
-                return getFlowViewType(position);
+                return getFlowViewType(realPosition(position));
             }
         }
 
@@ -732,20 +743,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             mFooterView = footer;
             mFooterValue = footerHeight;
             notifyDataSetChanged();
-        }
-
-        private int dip2px(View view,float dpValue) {
-            if(view==null) return 0;
-            final float scale = view.getResources().getDisplayMetrics().density;
-            return (int) (dpValue * scale + 0.5f);
-        }
-
-        public final void setHeaderDip(View header,int headerDip){
-            setHeader(header,dip2px(header,headerDip));
-        }
-
-        public final void setFooterDip(View footer,int footerDip){
-            setFooter(footer,dip2px(footer,footerDip));
         }
 
         public int getHeaderOffset(){
@@ -779,7 +776,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
      * @author xiehonglin429 on 16/2/26.
      */
     private class FlowState implements Comparator<Point>{
-        private final int mTotalFactor; //磁贴区域的总宽度
 
         private List<Point> mVertexPoints = new ArrayList<>(); //布局过程中的顶点,用于计算下一个添加的磁贴的布局位置
 
@@ -793,9 +789,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             return (getOrientation()==HORIZONTAL)?(lhs.y - rhs.y):(lhs.x - rhs.x);
         }
 
-        public FlowState(int mMaxWidth) {
-            this.mTotalFactor = mMaxWidth;
-        }
 
         public Pair<Rect,Rect> getRectAt(int index){
             if(index<mRectList.size()&& index>=0) return mRectList.get(index);
@@ -825,7 +818,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             boolean needAdd;
             if(mVertexPoints.size()==0){//当前顶点列表为空
                 needAdd = true;
-            } else if (valueSqDirection(mVertexPoints.get(mVertexPoints.size()-1))< mTotalFactor) {
+            } else if (valueSqDirection(mVertexPoints.get(mVertexPoints.size()-1))< mFlowSource.totalFactor()) {
                 //最后一个顶点的x坐标小与总宽度,代表紧贴顶部的第一行仍未布满
                 boolean removeOld = isV?(rect.bottom == mVertexPoints.get(mVertexPoints.size()-1).y):(rect.right == mVertexPoints.get(mVertexPoints.size()-1).x);
                 if (removeOld) {
@@ -848,11 +841,11 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         }
 
         private Rect convertToReal(Rect rect) {
-            int realTotalValue = getOrientation()==VERTICAL?getWidth():getHeight();
-            int top = rect.top*realTotalValue/mTotalFactor;
-            int left = rect.left*realTotalValue/mTotalFactor;
-            int bottom = rect.bottom*realTotalValue/mTotalFactor;
-            int right = rect.right*realTotalValue/mTotalFactor;
+            int realTotalValue = getNotDirectionValue();
+            int top = rect.top*realTotalValue/mFlowSource.totalFactor();
+            int left = rect.left*realTotalValue/mFlowSource.totalFactor();
+            int bottom = rect.bottom*realTotalValue/mFlowSource.totalFactor();
+            int right = rect.right*realTotalValue/mFlowSource.totalFactor();
             Rect realRect = new Rect(left,top,right,bottom);
             return isReverseLayout()?reverseRect(realRect):realRect;
         }
@@ -901,7 +894,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
                     if(compareDirection(p,point)<0){
                         if(i>0){
                             Point prevP = mVertexPoints.get(i-1);
-                            if(valueSqDirection(prevP)> mTotalFactor){
+                            if(valueSqDirection(prevP)> mFlowSource.totalFactor()){
                                 continue;
                             }
                         }
@@ -924,7 +917,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         private Point getSmallestValueOnDirectionVertex(){
             if(mVertexPoints.size()==0) return new Point(0,0);
             Point vertex = mVertexPoints.get(mVertexPoints.size()-1);
-            if(valueSqDirection(vertex)< mTotalFactor){
+            if(valueSqDirection(vertex)< mFlowSource.totalFactor()){
                 //最后一个顶点的x坐标小与总宽度,代表紧贴顶部的第一行仍未布满
                 boolean v = (getOrientation()==VERTICAL);
                 int sqValue = valueSqDirection(vertex);
@@ -944,8 +937,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
                     }
                 }
             }
-            int realTotalValue = getOrientation()==VERTICAL?getWidth():getHeight();
-            return valueDirection(point)*realTotalValue/mTotalFactor;
+            int realTotalValue =getNotDirectionValue();
+            return valueDirection(point)*realTotalValue/mFlowSource.totalFactor();
         }
 
         /**
