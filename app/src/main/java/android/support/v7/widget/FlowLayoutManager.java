@@ -731,6 +731,19 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             return count;
         }
 
+        private int dip2px(View view,float dpValue) {
+            final float scale = view.getResources().getDisplayMetrics().density;
+            return (int) (dpValue * scale + 0.5f);
+        }
+
+        public final void setHeaderDip(View header,float headHeightDip){
+            setHeader(header,header!=null?dip2px(header,headHeightDip):0);
+        }
+
+        public final void setFooterDip(View footer,float footerHeightDip){
+            setFooter(footer,footer!=null?dip2px(footer,footerHeightDip):0);
+        }
+
         public final void setHeader(View header,int headerHeight){
             mHeaderView = header;
             mHeaderValue = headerHeight;
