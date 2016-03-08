@@ -939,6 +939,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         }
 
         public int getVertexDirectionMaxValue(){
+            if(mVertexPoints.isEmpty()) return 0;
             Point point = mVertexPoints.get(0);
             if(mVertexPoints.size()>1){
                 for(int i=1;i<mVertexPoints.size();i++){
