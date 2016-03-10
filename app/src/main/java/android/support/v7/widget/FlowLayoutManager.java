@@ -229,7 +229,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
                     addFooter(recycler,state);
                     continue;
                 }
-                if (!addFlowChild(recycler, i, false, scrollDelta)){
+                if (!addFlowChild(recycler, i, false, scrollDelta,true)){
                     break;
                 }
             }
@@ -261,7 +261,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
                 addFooter(recycler, state);
                 continue;
             }
-            if (!addFlowChild(recycler, i, false, scrollDelta)) {
+            if (!addFlowChild(recycler, i, false, scrollDelta,true)) {
                 break;
             }
         }
@@ -276,7 +276,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         }else{
             startPos = state.getItemCount();
         }
-        for(int i=startPos-1;i>=0;i--){
+        int endPos = findFirstVisiblePosition(state,scrollDelta);
+        for(int i=startPos-1;i>=endPos;i--){
             if (isHeader(i)){
                 addHeader(recycler);
                 continue;
@@ -284,9 +285,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
                 addFooter(recycler,state);
                 continue;
             }
-            if (!addFlowChild(recycler, i, true, scrollDelta)){
-                break;
-            }
+            addFlowChild(recycler, i, true, scrollDelta,false);
         }
     }
 
@@ -374,7 +373,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         return mFlowSource.hasHeader()?index-1:index;
     }
 
-    private boolean addFlowChild(RecyclerView.Recycler recycler, int i, boolean first, int scrollDelta) {
+    private boolean addFlowChild(RecyclerView.Recycler recycler, int i, boolean first, int scrollDelta,boolean breakUnvisible) {
         int index = itemIndexToFlowIndex(i);
         Pair<Rect,Rect> rectPair = mFlowSate.getRectAt(index);
         if(rectPair==null){
@@ -383,7 +382,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             int heightFactor = mFlowSource.heightFactorAt(index);
             rectPair = mFlowSate.addRect(widthFactor,heightFactor);
         }
-        if(!isVisibleRect(rectPair.second,scrollDelta)){
+        if(breakUnvisible&&!isVisibleRect(rectPair.second,scrollDelta)){
             return false;
         }
         View view = recycler.getViewForPosition(i);
