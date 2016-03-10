@@ -6,6 +6,7 @@ import android.graphics.Rect;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.LayoutParams;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -171,8 +172,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             if(isReverseLayout()){
                 left = realRect.left+getPaddingLeft();
                 right = realRect.right+getPaddingLeft();
-                top = realRect.top+ mScrollDelta+getHeight()-delta;
-                bottom = realRect.bottom+ mScrollDelta+getHeight()-delta;
+                top = realRect.top+ mScrollDelta+getDirectionValue()-delta+getPaddingTop();
+                bottom = realRect.bottom+ mScrollDelta+getDirectionValue()-delta+getPaddingTop();
             }else{
                 left = realRect.left+getPaddingLeft();
                 right = realRect.right+getPaddingLeft();
@@ -181,8 +182,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             }
         }else{
             if(isReverseLayout()){
-                left = realRect.left+ mScrollDelta+getWidth()-delta+getPaddingLeft();
-                right = realRect.right+ mScrollDelta+getWidth()-delta+getPaddingLeft();
+                left = realRect.left+ mScrollDelta+getDirectionValue()-delta+getPaddingLeft();
+                right = realRect.right+ mScrollDelta+getDirectionValue()-delta+getPaddingLeft();
                 top = realRect.top+getPaddingTop();
                 bottom = realRect.bottom+getPaddingTop();
             }else{
@@ -428,7 +429,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
                 return (top>-1&&top<=height)||(bottom>-1&&bottom<=height);
             }
         }else{
-            int width = getWidth();
+            int width = getDirectionValue();
             if(isReverseLayout()){
                 int left = rect.left+scrollDelta+width-mFlowSource.getHeaderOffset();
                 int right = rect.right+scrollDelta+width-mFlowSource.getHeaderOffset();
@@ -443,10 +444,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
     private int getScrollDelta(){
         return mScrollDelta;
-    }
-
-    private int getDirectionValueWithPadding(){
-        return getOrientation()==VERTICAL?getHeight():getWidth();
     }
 
     private int getDirectionValue(){
