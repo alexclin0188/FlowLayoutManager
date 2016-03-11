@@ -6,7 +6,7 @@ import android.graphics.Rect;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.LayoutParams;
-import android.util.Log;
+import android.support.v7.widget.RecyclerView.State;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,12 +85,12 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
     @Override
     public int scrollHorizontallyBy(int dx, RecyclerView.Recycler recycler, RecyclerView.State state) {
-        return scrollBy(dx,recycler,state);
+        return scrollBy(dx, recycler, state);
     }
 
     @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
-        return scrollBy(dy,recycler,state);
+        return scrollBy(dy, recycler, state);
     }
 
     private int scrollBy(int delta, RecyclerView.Recycler recycler, RecyclerView.State state) {
@@ -276,7 +276,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
         }else{
             startPos = state.getItemCount();
         }
-        int endPos = findFirstVisiblePosition(state,scrollDelta);
+        int endPos = findFirstVisiblePosition(state, scrollDelta);
         for(int i=startPos-1;i>=endPos;i--){
             if (isHeader(i)){
                 addHeader(recycler);
@@ -338,8 +338,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             removeAndRecycleView(child, recycler);
         }
     }
-
-
 
     private int findFirstVisiblePosition(RecyclerView.State state, int scrollDelta) {
         for(int i=0;i<state.getItemCount();i++){
@@ -600,6 +598,53 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
     public View onFocusSearchFailed(View focused, int direction, RecyclerView.Recycler recycler, RecyclerView.State state) {
         if(getChildCount()>0) return getChildAt(0);
         return null;
+    }
+
+    public int computeHorizontalScrollExtent(State state) {
+        return computeScrollExtent(state);
+    }
+
+    public int computeHorizontalScrollOffset(State state) {
+        return computeScrollOffset(state);
+    }
+
+    public int computeHorizontalScrollRange(State state) {
+        return computeScrollRange(state);
+    }
+
+    public int computeVerticalScrollExtent(State state) {
+        return computeScrollExtent(state);
+    }
+
+    public int computeVerticalScrollOffset(State state) {
+        return computeScrollOffset(state);
+    }
+
+    public int computeVerticalScrollRange(State state) {
+        return computeScrollRange(state);
+    }
+
+    private int computeScrollExtent(State state) {
+        if(getChildCount()==0){
+            return 0;
+        }
+        return getChildCount();
+    }
+
+    private int computeScrollOffset(State state) {
+        if(getChildCount()==0){
+            return 0;
+        }
+        View child = getChildAt(0);
+        LayoutParams lp = (LayoutParams) child.getLayoutParams();
+        return lp.getViewAdapterPosition()+1;
+    }
+
+    private int computeScrollRange(State state) {
+        if(getChildCount()==0){
+            return 0;
+        }
+        return state.getItemCount();
     }
 
     private static class InnerHolder extends RecyclerView.ViewHolder{
