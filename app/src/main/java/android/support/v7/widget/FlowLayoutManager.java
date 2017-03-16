@@ -210,13 +210,12 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
                 int max = getLayoutDirectionTotalValue();
                 scrollDelta = getDirectionValue()-max;
                 if(scrollDelta>0) scrollDelta = 0;
-                if(mScrollDelta<scrollDelta){
-                    int newDelta = mScrollDelta-scrollDelta;
-                    if(delta==0){
-                        offsetContent(newDelta);
-                    }else
-                        delta = newDelta;
-                }
+                if(isReverseLayout()) scrollDelta = -scrollDelta;
+                int newDelta = mScrollDelta - scrollDelta;
+                if (delta == 0) {
+                    offsetContent(newDelta);
+                } else
+                    delta = newDelta;
                 fillViewStart(recycler,state,scrollDelta);
                 return delta;
             }

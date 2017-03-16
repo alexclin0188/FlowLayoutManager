@@ -40,11 +40,27 @@
             android:layout_margin="3dip"/>
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/act_main_view_recycler"
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv"
+        android:visibility="gone"
+        android:layout_below="@id/top_layout"
+        android:text="Refreshing..."
+        android:gravity="center"/>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/top_layout"
-        android:clipChildren="false"
-        android:padding="30dip"/>
+        android:layout_below="@id/tv"
+        >
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/act_main_view_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:clipChildren="false"
+            android:padding="30dip"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
 </RelativeLayout>

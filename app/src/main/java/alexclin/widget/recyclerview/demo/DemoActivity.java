@@ -3,12 +3,14 @@ package alexclin.widget.recyclerview.demo;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.FlowLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -29,6 +31,9 @@ public class DemoActivity extends Activity {
     private RecyclerAdapter paddingAdapter;
 
     private RecyclerView mRecyclerView;
+    private SwipeRefreshLayout refreshLayout;
+    private TextView textView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,11 +56,35 @@ public class DemoActivity extends Activity {
         }
         mRecyclerView = (RecyclerView) findViewById(R.id.act_main_view_recycler);
         if(orentaion== FlowLayoutManager.HORIZONTAL){
-            RelativeLayout.LayoutParams vlp = (RelativeLayout.LayoutParams) mRecyclerView.getLayoutParams();
+            ViewGroup.LayoutParams vlp = mRecyclerView.getLayoutParams();
             vlp.height = getDisplayMetrics(this).heightPixels/2;
             mRecyclerView.setLayoutParams(vlp);
         }
         mRecyclerView.setAdapter(paddingAdapter);
+
+        refreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh_layout);
+        textView = (TextView) findViewById(R.id.tv);
+        refreshLayout.setColorSchemeResources(android.R.color.holo_blue_light, android.R.color.holo_red_light,
+                android.R.color.holo_orange_light, android.R.color.holo_green_light);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            int index = 0;
+            @Override
+            public void onRefresh() {
+                textView.setVisibility(View.VISIBLE);
+                textView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        textView.setVisibility(View.GONE);
+                        refreshLayout.setRefreshing(false);
+                        index++;
+                        if(index%2==0)
+                            paddingAdapter.updateList(Item.createList(FlowLayoutManager.VERTICAL));
+                        else
+                            paddingAdapter.updateList(Item.paddingList());
+                    }
+                },3000);
+            }
+        });
     }
 
     private DisplayMetrics getDisplayMetrics(Context ctx){
